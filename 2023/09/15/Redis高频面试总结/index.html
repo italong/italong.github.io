@@ -167,7 +167,7 @@
 <p>1.在缓存中存放大量的空值key，但是一般不推荐这样使用</p>
 <p>2.通过布隆过滤器，在数据查询缓存前，我们先经过布隆过滤器过滤，如果存在再走缓存，如果不存在再去查询数据库，将数据缓存，而数据则一直在布隆过滤器重试；从而达到过滤的作用，而布隆过滤器的底层是散列函数通过三次hash来判断是否存在这个值，不过它存在一定的误判率，一般我们通过控制数组长度来将误判率控制在5%以下；</p>
 <h2 id="1-2-缓存击穿"><a href="#1-2-缓存击穿" class="headerlink" title="1.2 缓存击穿"></a>1.2 缓存击穿</h2><p>概念： 某个key到了过期时间后，大量当前key的请求发送过来，查询缓存发现已经过期后，直接查询数据库，会给数据库造成很大的压力；</p>
-<p><img src="/2023/09/15/Redis%E9%AB%98%E9%A2%91%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/code\ideaspace\bighouse\myblog_g1\themes\butterfly\source\img\images\Redis\hcjc.png" alt="hcjc"><img src="/2023/09/15/Redis%E9%AB%98%E9%A2%91%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/code\ideaspace\bighouse\myblog_g1\themes\butterfly\source\img\images\Redis\luojiguoqi.png" alt="luojiguoqi"></p>
+<p><img src="/.io//code\ideaspace\bighouse\myblog_g1\themes\butterfly\source\img\images\Redis\hcjc.png" alt="hcjc"><img src="/.io//code\ideaspace\bighouse\myblog_g1\themes\butterfly\source\img\images\Redis\luojiguoqi.png" alt="luojiguoqi"></p>
 <p>解决方案：</p>
 <ol>
 <li>互斥锁：我们通过增加互斥锁，假如说一个线程1请求当前key，发现过期，这时候它会加互斥锁，再查询数据库去重建缓存数据，这时候如果线程2进来，他也去缓存中查询这个key，它是无法操作的，只能不断休眠重试获取互斥锁；当线程1操作得到缓存后，释放了互斥锁，线程2就查询缓存，从而缓存命中；一般来说和钱有关的我们就使用这种方案，不过它的性能可能比较差。</li>
